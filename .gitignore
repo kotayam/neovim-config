@@ -1,0 +1,22 @@
+# Swap, backup, and undo files (temporary and unnecessary to track)
+*.swp
+*.swo
+*.swn
+backup/
+undo/
+
+# Cache and logs (generated during runtime)
+.cache/
+log/
+*.log
+.nvimlog
+
+# Mason and LSP caches (reinstall automatically via mason.nvim)
+mason/
+.mason/
+.lsp/
+
+# Python virtual environments (if used for Neovim development)
+venv/
+.env/
+
