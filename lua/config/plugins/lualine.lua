@@ -9,8 +9,8 @@ return {
             },
             sections = {
                 lualine_a = { { 'mode', fmt = function(str) return str:sub(1, 1) end } },
-                lualine_b = { 'branch' },
-                lualine_c = { 'filename' },
+                lualine_b = { 'filename' },
+                lualine_c = { 'branch' },
                 lualine_x = { 'encoding', 'filetype' },
                 lualine_y = { 'progress' },
                 lualine_z = { 'location' }

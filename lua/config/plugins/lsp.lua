@@ -39,7 +39,13 @@ return {
                     "lua_ls", -- Lua
                     "ts_ls",  -- TypeScript/JavaScript
                     "eslint",
-                    "prismals"
+                    "prismals",
+                    "gopls",
+                    "templ",
+                    "html",
+                    "htmx",
+                    "cssls",
+                    "tailwindcss"
                 },
                 automatic_installation = true, -- Auto-install if missing
             })
@@ -60,6 +66,15 @@ return {
                                 }
                             }
                         }
+                    elseif server_name == "ts_ls" then
+                        opts = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact",
+                            "typescript.tsx", "templ" }
+                    elseif server_name == "html" then
+                        opts = { filetypes = { "html", "templ" } }
+                    elseif server_name == "htmx" then
+                        opts = { filetypes = { "html", "templ" } }
+                    elseif server_name == "tailwindcss" then
+                        opts = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } }
                     end
                     lspconfig[server_name].setup(opts)
                 end,
@@ -75,9 +90,10 @@ return {
                 sources = {
                     null_ls.builtins.formatting.prettier.with({
                         extra_args = { "--print-width", "80" }
-                    })
+                    }),
                 }
             })
+
 
             -- LSP keybindings (attach on active LSP)
             vim.api.nvim_create_autocmd("LspAttach", {
@@ -103,7 +119,29 @@ return {
                     if not client then return end
 
                     if client:supports_method('textDocument/formatting', 0) then
-                        -- format the current buffer on save
+                        -- format for templ
+                        local templ_format = function()
+                            local bufnr = vim.api.nvim_get_current_buf()
+                            local filename = vim.api.nvim_buf_get_name(bufnr)
+                            local cmd = "templ fmt " .. vim.fn.shellescape(filename)
+
+                            vim.defer_fn(function()
+                                vim.fn.jobstart(cmd, {
+                                    on_exit = function()
+                                        -- Reload the buffer only if it's still the current buffer
+                                        if vim.api.nvim_get_current_buf() == bufnr then
+                                            vim.cmd('e!')
+                                        end
+                                    end,
+                                })
+                            end, 100)
+                        end
+                        -- clear existing autocmds before setting a new one
+                        vim.api.nvim_create_augroup("TemplFormatGroup", { clear = true })
+                        vim.api.nvim_create_autocmd({ "BufWritePre" },
+                            { pattern = { "*.templ" }, group = "TemplFormatGroup", callback = templ_format })
+
+                        -- default format the current buffer on save
                         vim.api.nvim_create_autocmd("BufWritePre", {
                             buffer = args.buf,
                             callback = function() vim.lsp.buf.format({ bufnr = args.buf, id = client.id }) end
