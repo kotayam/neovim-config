@@ -45,7 +45,9 @@ return {
                     "html",
                     "htmx",
                     "cssls",
-                    "tailwindcss"
+                    "tailwindcss",
+                    "bashls",
+                    "svelte"
                 },
                 automatic_installation = true, -- Auto-install if missing
             })
