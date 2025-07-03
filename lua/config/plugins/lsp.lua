@@ -1,11 +1,11 @@
 return {
     {
-        "williamboman/mason.nvim",
+        "mason-org/mason.nvim",
         build = ":MasonUpdate", -- Automatically update registries
         config = true,          -- Uses default config
     },
     {
-        "williamboman/mason-lspconfig.nvim",
+        "mason-org/mason-lspconfig.nvim",
         dependencies = {
             "neovim/nvim-lspconfig",
             {
@@ -53,34 +53,33 @@ return {
             })
 
             -- Auto-configure installed servers
-            mason_lspconfig.setup_handlers({
-                function(server_name)
-                    local opts = {}
-                    -- add lazydev support for lua_ls
-                    if server_name == "lua_ls" then
-                        local lazydev = require("lazydev")
-                        opts = {
-                            settings = {
-                                Lua = {
-                                    workspace = {
-                                        library = lazydev.path,
-                                    }
-                                }
-                            }
-                        }
-                    elseif server_name == "ts_ls" then
-                        opts = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact",
-                            "typescript.tsx", "templ" }
-                    elseif server_name == "html" then
-                        opts = { filetypes = { "html", "templ" } }
-                    elseif server_name == "htmx" then
-                        opts = { filetypes = { "html", "templ" } }
-                    elseif server_name == "tailwindcss" then
-                        opts = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } }
-                    end
-                    lspconfig[server_name].setup(opts)
-                end,
-            })
+            local servers = mason_lspconfig.get_installed_servers()
+            for _, server_name in ipairs(servers) do
+               local opts = {}
+               -- add lazydev support for lua_ls
+               if server_name == "lua_ls" then
+                   local lazydev = require("lazydev")
+                   opts = {
+                       settings = {
+                           Lua = {
+                               workspace = {
+                                   library = lazydev.path,
+                               }
+                           }
+                       }
+                   }
+               elseif server_name == "ts_ls" then
+                   opts = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact",
+                       "typescript.tsx", "templ" }
+               elseif server_name == "html" then
+                   opts = { filetypes = { "html", "templ" } }
+               elseif server_name == "htmx" then
+                   opts = { filetypes = { "html", "templ" } }
+               elseif server_name == "tailwindcss" then
+                   opts = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } }
+               end
+               lspconfig[server_name].setup(opts)
+            end
 
             -- setup null-ls with prettier
             local null_ls = require("null-ls")
