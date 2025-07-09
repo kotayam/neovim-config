@@ -1,17 +1,21 @@
-local null_ls = require("null-ls")
-
 -- define custom formatters
 -- templ files
-local templ_formatter = {
-    method = null_ls.methods.FORMATTING,
-    filetypes = { "templ" },
-    generator = null_ls.formatter({
-        command = "templ",
-        args = { "fmt" },
-    }),
-    to_stdin = true,
-}
+local templ_format = function(bufnr)
+    local filename = vim.api.nvim_buf_get_name(bufnr)
+    local cmd = "templ fmt " .. vim.fn.shellescape(filename)
 
-return {
-    templ = templ_formatter,
-}
+    if vim.bo.modified then
+        vim.cmd("write")
+    end
+
+    vim.fn.jobstart(cmd, {
+        on_exit = function()
+            -- reload the buffer only if it is still the current buffer
+            if vim.api.nvim_get_current_buf() == bufnr then
+                vim.cmd("e!")
+            end
+        end,
+    })
+end
+
+return { templ_format = templ_format }

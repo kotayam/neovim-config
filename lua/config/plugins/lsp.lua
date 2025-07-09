@@ -55,7 +55,7 @@ return {
             eslint = {},
             prismals = {},
             gopls = {},
-            templ = { disable_format = true },
+            templ = {},
             html = {
                 disable_format = true,
                 filetypes = { "html", "templ" },
@@ -75,15 +75,20 @@ return {
 
         -- filter out disabled formatters
         local lsp_formatting = function(bufnr)
-            vim.lsp.buf.format({
-                bufnr = bufnr,
-                filter = function(client)
-                    local config = lsp_servers[client.name]
-                    local disabled = config and config.disable_format
-                    print("Client:", client.name, "-> disabled:", disabled)
-                    return not disabled
-                end,
-            })
+            local custom = require("custom.formatter")
+            if vim.bo.filetype == "templ" then
+                custom.templ_format(bufnr)
+            else
+                vim.lsp.buf.format({
+                    bufnr = bufnr,
+                    filter = function(client)
+                        local config = lsp_servers[client.name]
+                        local disabled = config and config.disable_format
+                        print("Client:", client.name, "-> disabled:", disabled)
+                        return not disabled
+                    end,
+                })
+            end
         end
 
         local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -102,6 +107,10 @@ return {
             end
 
             local opts = { buffer = bufnr }
+            -- Format file
+            vim.keymap.set("n", "<leader>f", function()
+                lsp_formatting(bufnr)
+            end)
             -- Go to definition
             vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
             -- Show references

@@ -5,19 +5,13 @@ return {
     },
     config = function()
         local null_ls = require("null-ls")
-        local custom = require("custom.formatter")
         local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
         null_ls.setup({
             sources = {
                 null_ls.builtins.formatting.stylua,
                 null_ls.builtins.formatting.prettier,
                 require("none-ls.diagnostics.eslint_d"),
-
-                -- custom formatters
-                custom.templ,
             },
-
-            vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, {}),
 
             on_attach = function(client, bufnr)
                 if client.supports_method("textDocument/formatting") then
