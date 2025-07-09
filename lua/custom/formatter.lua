@@ -7,9 +7,9 @@ local templ_formatter = {
     filetypes = { "templ" },
     generator = null_ls.formatter({
         command = "templ",
-        args = { "fmt", "$FILENAME" },
+        args = { "fmt" },
     }),
-    to_stdin = false,
+    to_stdin = true,
 }
 
 return {

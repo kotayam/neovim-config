@@ -25,44 +25,24 @@ return {
         local mason_lspconfig = require("mason-lspconfig")
         local lspconfig = require("lspconfig")
 
-        -- Ensure these servers are installed
-        mason_lspconfig.setup({
-            ensure_installed = {
-                "lua_ls", -- Lua
-                "ts_ls", -- TypeScript/JavaScript
-                "eslint",
-                "prismals",
-                "gopls",
-                "templ",
-                "html",
-                "htmx",
-                "cssls",
-                "tailwindcss",
-                "bashls",
-                "svelte",
-            },
-            automatic_installation = true, -- Auto-install if missing
-        })
-
-        -- Auto-configure installed servers
-        local servers = mason_lspconfig.get_installed_servers()
-        for _, server_name in ipairs(servers) do
-            local opts = {}
-
-            -- add lazydev support for lua_ls
-            if server_name == "lua_ls" then
-                local lazydev = require("lazydev")
-                opts = {
-                    settings = {
+        -- lsp servers with options
+        local lsp_servers = {
+            lua_ls = {
+                disable_format = true,
+                settings = function()
+                    local lazydev = require("lazydev")
+                    return {
                         Lua = {
                             workspace = {
                                 library = lazydev.path,
                             },
                         },
-                    },
-                }
-            elseif server_name == "ts_ls" then
-                opts = {
+                    }
+                end,
+            },
+            ts_ls = {
+                disable_format = true,
+                filetypes = {
                     "javascript",
                     "javascriptreact",
                     "javascript.jsx",
@@ -70,37 +50,88 @@ return {
                     "typescriptreact",
                     "typescript.tsx",
                     "templ",
-                }
-            elseif server_name == "html" then
-                opts = { filetypes = { "html", "templ" } }
-            elseif server_name == "htmx" then
-                opts = { filetypes = { "html", "templ" } }
-            elseif server_name == "tailwindcss" then
-                opts = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } }
-            end
-            lspconfig[server_name].setup(opts)
+                },
+            },
+            eslint = {},
+            prismals = {},
+            gopls = {},
+            templ = { disable_format = true },
+            html = {
+                disable_format = true,
+                filetypes = { "html", "templ" },
+            },
+            htmx = { filetypes = { "html", "templ" } },
+            cssls = { disable_format = true },
+            tailwindcss = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } },
+            bashls = {},
+            svelte = {},
+        }
+
+        -- Ensure these servers are installed
+        mason_lspconfig.setup({
+            ensure_installed = vim.tbl_keys(lsp_servers),
+            automatic_installation = true, -- Auto-install if missing
+        })
+
+        -- filter out disabled formatters
+        local lsp_formatting = function(bufnr)
+            vim.lsp.buf.format({
+                bufnr = bufnr,
+                filter = function(client)
+                    local config = lsp_servers[client.name]
+                    local disabled = config and config.disable_format
+                    print("Client:", client.name, "-> disabled:", disabled)
+                    return not disabled
+                end,
+            })
         end
 
-        -- LSP keybindings (attach on active LSP)
-        vim.api.nvim_create_autocmd("LspAttach", {
-            callback = function(args)
-                local opts = { buffer = args.buf }
-                -- Go to definition
-                vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-                -- Show references
-                vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-                -- Hover documentation
-                -- vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-                -- Rename symbol
-                vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-                -- Code actions
-                vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-                -- Show diagnostics
-                vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
-                vim.diagnostic.config({
-                    virtual_text = true,
+        local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+        -- on attach function
+        local on_attach = function(client, bufnr)
+            if client.supports_method("textDocument/formatting") then
+                vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                    group = augroup,
+                    buffer = bufnr,
+                    callback = function()
+                        lsp_formatting(bufnr)
+                    end,
                 })
-            end,
-        })
+            end
+
+            local opts = { buffer = bufnr }
+            -- Go to definition
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+            -- Show references
+            vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+            -- Hover documentation
+            -- vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+            -- Rename symbol
+            vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+            -- Code actions
+            vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+            -- Show diagnostics
+            vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
+            vim.diagnostic.config({
+                virtual_text = true,
+            })
+        end
+
+        -- configure installed servers
+        for name, conf in pairs(lsp_servers) do
+            local opts = { on_attach = on_attach }
+
+            if conf.settings then
+                opts.settings = conf.settings
+            end
+
+            if conf.filetypes then
+                opts.filetypes = conf.filetypes
+            end
+
+            lspconfig[name].setup(opts)
+        end
     end,
 }
