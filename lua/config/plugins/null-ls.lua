@@ -1,0 +1,42 @@
+return {
+    "nvimtools/none-ls.nvim",
+    dependencies = {
+        "nvimtools/none-ls-extras.nvim",
+    },
+    config = function()
+        local null_ls = require("null-ls")
+        local custom = require("custom.formatter")
+        local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+        null_ls.setup({
+            sources = {
+                null_ls.builtins.formatting.stylua,
+                null_ls.builtins.formatting.prettier,
+                require("none-ls.diagnostics.eslint_d"),
+
+                -- custom formatters
+                custom.templ,
+            },
+
+            vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, {}),
+
+            on_attach = function(client, bufnr)
+                if client.supports_method("textDocument/formatting") then
+                    vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+                    vim.api.nvim_create_autocmd("BufWritePre", {
+                        group = augroup,
+                        buffer = bufnr,
+                        callback = function()
+                            vim.lsp.buf.format({
+                                bufnr = bufnr,
+                                filter = function(c)
+                                    print("Formatter client:", c.name)
+                                    return true
+                                end,
+                            })
+                        end,
+                    })
+                end
+            end,
+        })
+    end,
+}
