@@ -4,7 +4,7 @@ return {
         {
             "mason-org/mason.nvim",
             build = ":MasonUpdate", -- Automatically update registries
-            config = true,          -- Uses default config
+            config = true, -- Uses default config
         },
         "neovim/nvim-lspconfig",
         {
@@ -29,7 +29,7 @@ return {
         mason_lspconfig.setup({
             ensure_installed = {
                 "lua_ls", -- Lua
-                "ts_ls",  -- TypeScript/JavaScript
+                "ts_ls", -- TypeScript/JavaScript
                 "eslint",
                 "prismals",
                 "gopls",
@@ -77,12 +77,7 @@ return {
                 opts = { filetypes = { "html", "templ" } }
             elseif server_name == "tailwindcss" then
                 opts = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } }
-            elseif server_name == "templ" then
-                opts.on_attach = function(client)
-                    client.server_capabilities.documentFormattingProvider = false
-                end
             end
-
             lspconfig[server_name].setup(opts)
         end
 

@@ -9,6 +9,7 @@ local templ_formatter = {
         command = "templ",
         args = { "fmt", "$FILENAME" },
     }),
+    to_stdin = false,
 }
 
 return {
