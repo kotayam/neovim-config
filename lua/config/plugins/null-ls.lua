@@ -22,10 +22,6 @@ return {
                         callback = function()
                             vim.lsp.buf.format({
                                 bufnr = bufnr,
-                                filter = function(c)
-                                    print("Formatter client:", c.name)
-                                    return true
-                                end,
                             })
                         end,
                     })

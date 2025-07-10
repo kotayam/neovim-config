@@ -84,7 +84,7 @@ return {
                     filter = function(client)
                         local config = lsp_servers[client.name]
                         local disabled = config and config.disable_format
-                        print("Client:", client.name, "-> disabled:", disabled)
+                        -- print("Client:", client.name, "-> disabled:", disabled)
                         return not disabled
                     end,
                 })
