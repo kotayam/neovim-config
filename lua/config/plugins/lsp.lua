@@ -116,7 +116,7 @@ return {
             -- Show references
             vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
             -- Hover documentation
-            -- vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
             -- Rename symbol
             vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
             -- Code actions
