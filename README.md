@@ -26,9 +26,9 @@ chmod +x setup.sh
 
 ## File Structure
 
-neovim-config
-├── init.lua
-├── lazy-lock.json
-├── lua # Configs.
-├── README.md # This file.
+neovim-config/  
+├── init.lua  
+├── lazy-lock.json  
+├── lua # Configs.  
+├── README.md # This file.  
 └── setup.sh # Installer.
