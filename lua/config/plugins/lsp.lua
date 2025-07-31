@@ -20,6 +20,7 @@ return {
 		},
 	},
 	config = function()
+		require("mason").setup()
 		local mason_lspconfig = require("mason-lspconfig")
 		local lspconfig = require("lspconfig")
 
