@@ -64,6 +64,7 @@ return {
 			tailwindcss = { filetypes = { "templ", "javascript", "typescript", "react", "astro" } },
 			bashls = {},
 			svelte = {},
+			openscad_lsp = {},
 		}
 
 		-- Ensure these servers are installed
