@@ -65,6 +65,7 @@ return {
 			bashls = {},
 			svelte = {},
 			openscad_lsp = {},
+			clangd = {},
 		}
 
 		-- Ensure these servers are installed
