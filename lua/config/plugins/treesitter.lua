@@ -23,6 +23,7 @@ return {
 				"templ",
 				"make",
 				"bash",
+				"cpp",
 			},
 			sync_install = false,
 			auto_install = true,
